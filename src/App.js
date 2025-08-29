@@ -5,15 +5,31 @@ import config from "./config";
 import React from 'react';
 // добавляем импорт компонента Card
 import Card from "./components/Card";
+// добавляем popup из библиотеки
+import Popup from 'reactjs-popup';
 
 // меняем использование function на class, добавляем функцию render(){} и размещаем в нее весь код
 // function App() {
 class App extends React.Component {
     // создаем контсруктор для использования state и отслеживания изменений, в который сразу размещаем
-    // карточки, используемые в новой игре
+    // карточки, используемые в новой игре, позже добавляем состояние popup
     constructor() {
         super();
-        this.state = {cards: this.prepareCards(), clicks: 0};
+        // при реализации функционала запуска игры меняем
+        // this.state = {cards: this.prepareCards(), clicks: 0, isPopupOpened: false};
+        this.state = {cards: [], clicks: 0, isPopupOpened: false};
+    }
+
+    // вызываем запуск игры в самом начале
+    componentDidMount() {
+        this.startGame();
+    }
+
+    // в самом конце создаем метод для запуска игры в самом начале или после завершения очередной
+    startGame() {
+        this.setState({
+            cards: this.prepareCards(), clicks: 0, isPopupOpened: false
+        });
     }
 
     // создаем метод подготовки карточек, в котором получаем массив из двух массивов с карточкамиб
@@ -39,7 +55,7 @@ class App extends React.Component {
         // изменение состояния при клике
         this.setState({
             cards: this.state.cards.map(item => {
-                return item.id === openedItem.id ? {...item, isOpened: true} : item;
+                return item.id === openedItem.id ? {...item, isOpened: true} : item
             })
         }, () => {
             this.processChoosingCards();
@@ -47,29 +63,32 @@ class App extends React.Component {
 
         // создаем подсчет количества кликов
         // this.setState({clicks: this.state.clicks + 1});
-        this.setState({clicks: this.state.clicks + 1});
+        this.setState({
+            clicks: this.state.clicks + 1
+        });
     }
 
     // метод обработки выбранных карточек
     processChoosingCards() {
         const openedCards = this.state.cards.filter(item => item.isOpened);
-        if(openedCards.length === 2) {
+        if (openedCards.length === 2) {
             // если карточки одинаковые, они считаются открытыми в игре
-            if(openedCards[0].name === openedCards[1].name ) {
+            if (openedCards[0].name === openedCards[1].name) {
                 this.setState({
-                    cards: this.state.cards.map(item => {
-                        if(item.id === openedCards[0].id || item.id === openedCards[1].id) {
-                            item.isCompleted = true;
-                        }
+                        cards: this.state.cards.map(item => {
+                            if (item.id === openedCards[0].id || item.id === openedCards[1].id) {
+                                item.isCompleted = true;
+                            }
 
-                        item.isOpened = false;
-                        return item;
-                    // вызываем функцию проверки открытия всех карточек
+                            item.isOpened = false;
+                            return item;
+                            // вызываем функцию проверки открытия всех карточек
+                        })
                     }, () => {
                         this.checkForAllCompleted();
-                    })
-                })
-            // если карточки не одинаковые, то закрываем их
+                    }
+                )
+                // если карточки не одинаковые, то закрываем их
             } else {
                 setTimeout(() => {
                     this.setState({
@@ -84,10 +103,21 @@ class App extends React.Component {
     }
 
     // метод проверки завершения игры
-    checkForAllCompleted(){
-        if(this.state.cards.every(item => item.isCompleted)){
-
+    checkForAllCompleted() {
+        if (this.state.cards.every(item => item.isCompleted)) {
+            this.setState({
+                isPopupOpened: true
+            });
         }
+    }
+
+    // метод закрытия popup
+    closePopup() {
+        this.setState({
+            isPopupOpened: false
+        });
+        // вызываем запуск новой игры после завершения очередной игры
+        this.startGame();
     }
 
     render() {
@@ -113,7 +143,15 @@ class App extends React.Component {
                         }
                     </div>
                 </div>
-
+                {/*добавляем код из библиотеки popup*/}
+                <Popup open={this.state.isPopupOpened} closeOnDocumentClick onClose={this.closePopup.bind(this)}>
+                    <div className="modal">
+                        <span className="close" onClick={this.closePopup.bind(this)}>
+                            &times;
+                        </span>
+                        Игра завершена! Ваш результат: {this.state.clicks} кликов!
+                    </div>
+                </Popup>
             </div>
         );
     }

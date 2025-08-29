@@ -23,3 +23,21 @@
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
 }
+
+.popup-content {
+    background-color: #2b9595;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    max-width: 250px;
+    text-align: center;
+    padding: 20px;
+}
+
+.popup-content .close {
+    cursor: pointer;
+    position: absolute;
+    right: 5px;
+    top: -5px;
+    font-size: 24px;
+}
